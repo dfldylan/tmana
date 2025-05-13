@@ -29,38 +29,59 @@ body {
 }
 
 /* Ant Design Table 自定义 */
+/* 尝试移除 !important，如果样式失效，再考虑恢复或使用更高特异性的选择器 */
 :global(.ant-table-thead > tr > th) {
-  background-color: #fafafa !important; /* 表头背景色 */
-  font-weight: 600 !important; /* 表头字体加粗 */
-  color: rgba(0, 0, 0, 0.85) !important; /* 表头字体颜色 */
-  white-space: nowrap !important; /* 防止表头文字换行 */
-  text-align: center !important; /* 表头文字居中 */
+  background-color: #fafafa; 
+  font-weight: 600; 
+  color: rgba(0, 0, 0, 0.85); 
+  white-space: nowrap; 
+  text-align: center; 
 }
 
 /* 针对单元格内容 */
 :global(.ant-table-tbody > tr > td) {
-  white-space: nowrap !important; /* 防止单元格内容换行 */
+  white-space: nowrap; 
   /* 
     当列定义中使用了 ellipsis: true 时，Ant Design 会自动处理溢出隐藏和省略号。
     如果 ellipsis 不生效，可能需要手动添加以下样式，但通常不需要：
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
   */
 }
 
 :global(.ant-table-tbody > tr:hover > td) {
-  background-color: #e6f7ff !important; /* 行悬停背景色 (Ant Design 蓝色系) */
+  background-color: #e6f7ff; /* 行悬停背景色 (Ant Design 蓝色系) */
 }
 
 :global(.ant-table-bordered .ant-table-thead > tr > th),
 :global(.ant-table-bordered .ant-table-tbody > tr > td) {
-  border-color: #f0f0f0 !important; /* 边框颜色调浅一些 */
+  border-color: #f0f0f0; /* 边框颜色调浅一些 */
 }
 
 :global(.ant-table-title) {
-  padding: 16px 0px !important; /* 调整表格标题内边距 */
+  padding: 16px 0px; /* 调整表格标题内边距 */
 }
 
 :global(.ant-table-pagination.ant-pagination) {
-  margin-top: 24px !important; /* 分页器与表格间距 */
+  margin-top: 24px; /* 分页器与表格间距 */
+}
+
+/* Styles for react-resizable handle */
+.react-resizable-handle {
+  position: absolute;
+  right: -5px; /* 根据实际效果调整 */
+  top: 0;      /* 确保覆盖表头单元格的整个高度 */
+  bottom: 0;
+  z-index: 10;  /* 确保拖拽柄在其他元素之上，可根据需要调整 */
+  width: 10px; /* 拖拽柄的可点击区域宽度 */
+  height: 100%;
+  cursor: col-resize;
+  /* 如需可视化拖拽柄，可取消注释下一行 */
+  /* background: rgba(0, 0, 0, 0.05); */
+}
+
+/* 防止拖拽时选中文本 */
+:global(.ant-table-thead th.react-resizable), /* 针对应用了 react-resizable 的表头单元格 */
+:global(.react-resizable-resizing) { /* react-resizable 在拖拽时可能添加的类名 */
+  user-select: none;
 }
