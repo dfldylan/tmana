@@ -1,15 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import { Table } from 'antd';
-import type { ColumnsType, ColumnType, ColumnGroupType } from 'antd/es/table';
+import type { ColumnsType, ColumnType } from 'antd/es/table';
 import { taxForms as taxFormsApi } from '../services/api';
 import { TaxForm } from '../types/taxTypes';
 import './Main.css';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import { Input, InputNumber, DatePicker, Select, Button, message } from 'antd';
+import moment from 'moment';
+import { useAuth } from '../App';
+import { getInitialColumnsConfig } from '../config/columnsConfig';
+import { ProcessableColumnType, EditableColumnType, ResizableTitleProps } from '../types/tableTypes';
 
-interface ResizableTitleProps extends React.HTMLAttributes<HTMLElement> {
-  onColumnResize: (e: React.SyntheticEvent, data: { size: { width: number } }) => void;
-  width?: number;
+// 辅助函数：获取嵌套对象的值
+function getNestedValue(obj: any, path: (string | number)[]): any {
+  let current = obj;
+  for (const key of path) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+}
+
+// 辅助函数：设置嵌套对象的值，不修改原对象
+function setNestedValue(obj: any, path: (string | number)[], value: any): any {
+  if (path.length === 0) return value;
+  
+  const [first, ...rest] = path;
+  const newObj = Array.isArray(obj) ? [...obj] : { ...obj };
+  
+  if (rest.length === 0) {
+    newObj[first] = value;
+  } else {
+    newObj[first] = setNestedValue(
+      (first in newObj) ? newObj[first] : (typeof rest[0] === 'number' ? [] : {}),
+      rest,
+      value
+    );
+  }
+  
+  return newObj;
+}
+
+// 深拷贝对象，避免直接修改原数据
+function deepClone<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (obj instanceof Date) return new Date(obj.getTime()) as any;
+  
+  const result: any = Array.isArray(obj) ? [] : {};
+  
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result[key] = deepClone(obj[key]);
+    }
+  }
+  
+  return result as T;
 }
 
 const ResizableTitle: React.FC<ResizableTitleProps> = (props) => {
@@ -39,124 +88,156 @@ const ResizableTitle: React.FC<ResizableTitleProps> = (props) => {
   );
 };
 
-type ProcessableColumnType<T> = (ColumnGroupType<T> | ColumnType<T>);
-
 const Main: React.FC = () => {
+  // 现有状态
   const [data, setData] = useState<TaxForm[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 新增状态
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedData, setEditedData] = useState<TaxForm[] | null>(null);
+  
+  // 获取当前用户信息
+  const currentUser = { userType: 'admin' }; // 假设当前用户是管理员
+  
+  // 编辑相关的处理函数
+  const handleStartEditing = () => {
+    setEditedData(deepClone(data));
+    setIsEditing(true);
+  };
+  
+  const handleCancelEditing = () => {
+    setEditedData(null);
+    setIsEditing(false);
+  };
+  
+  const handleSaveChanges = async () => {
+    if (!editedData) return;
+    
+    setLoading(true);
+    try {
+      // 这里调用 API 保存更改
+      // 例如: await api.updateTaxForms(editedData);
+      await new Promise(resolve => setTimeout(resolve, 500)); // 模拟API调用
+      
+      setData(editedData); // 更新本地数据
+      setIsEditing(false);
+      setEditedData(null);
+      message.success('保存成功');
+    } catch (err) {
+      console.error('保存失败:', err);
+      message.error('保存失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const initialColumnsConfig: ColumnsType<TaxForm> = [
-    {
-      title: '基本信息',
-      key: 'basicInfo',
-      children: [
-        { title: '序号', dataIndex: 'id', key: 'id', sorter: (a, b) => a.id - b.id, ellipsis: true, width: 80 },
-        { title: '月度', dataIndex: 'month', key: 'month', sorter: (a, b) => a.month.localeCompare(b.month), ellipsis: true, width: 100 },
-        { title: '纳税人名称', dataIndex: 'taxpayer_name', key: 'taxpayer_name', ellipsis: true, width: 200 },
-        { title: '统一社会信用代码', dataIndex: 'credit_code', key: 'credit_code', ellipsis: true, width: 180 },
-        { title: '纳税人状态', dataIndex: 'taxpayer_status', key: 'taxpayer_status', ellipsis: true, width: 100 },
-        { title: '所属行业', dataIndex: 'industry', key: 'industry', ellipsis: true, width: 150 },
-        { title: '主管税务机关代码', dataIndex: 'tax_authority_code', key: 'tax_authority_code', ellipsis: true, width: 150 },
-        { title: '主管税务所名称', dataIndex: 'tax_authority_name', key: 'tax_authority_name', ellipsis: true, width: 150 },
-        { title: '表单状态', dataIndex: 'status', key: 'status', ellipsis: true, width: 100 },
-      ],
-    },
-    {
-      title: '欠税信息',
-      key: 'taxInfoGroup',
-      children: [
-        { title: '截至目前欠缴税费情况', dataIndex: ['tax_info', 'outstanding_tax'], key: 'outstanding_tax', render: val => val?.toLocaleString(), ellipsis: true, width: 180 },
-        { title: '涉及税费种', dataIndex: ['tax_info', 'tax_types'], key: 'tax_types', ellipsis: true, width: 250 },
-        { title: '清欠成效', dataIndex: ['tax_info', 'collection_effect'], key: 'collection_effect', render: val => val?.toLocaleString(), ellipsis: true, width: 120 },
-      ],
-    },
-    {
-      title: '日常管理',
-      key: 'dailyManagementGroup',
-      children: [
-        { title: '催缴提醒文书', dataIndex: ['daily_management', 'reminders'], key: 'dm_reminders', ellipsis: true, width: 120 },
-        { title: '发票管控', dataIndex: ['daily_management', 'invoice_control'], key: 'dm_invoice_control', ellipsis: true, width: 100 },
-        {
-          title: '风险提醒',
-          key: 'dm_riskAlertsGroup',
-          children: [
-            { title: '提醒文书', key: 'dm_ra_document', render: (_, record) => record.daily_management?.risk_alerts?.[0]?.document, ellipsis: true, width: 120 },
-            { title: '送达时间', key: 'dm_ra_delivery_date', render: (_, record) => record.daily_management?.risk_alerts?.[0]?.delivery_date, ellipsis: true, width: 120 },
-          ],
-        },
-        {
-          title: '约谈警示',
-          key: 'dm_interviewGroup',
-          children: [
-            { title: '是否约谈', dataIndex: ['daily_management', 'interview', 'has_interview'], key: 'dm_i_has_interview', render: (val) => val ? '是' : '否', ellipsis: true, width: 100 },
-            { title: '约谈文书', dataIndex: ['daily_management', 'interview', 'document'], key: 'dm_i_document', ellipsis: true, width: 150 },
-            { title: '约谈时间', dataIndex: ['daily_management', 'interview', 'interview_date'], key: 'dm_i_interview_date', ellipsis: true, width: 150 },
-          ],
-        },
-        {
-          title: '清缴欠税计划',
-          key: 'dm_taxPaymentPlanGroup',
-          children: [
-            { title: '有无订立', dataIndex: ['daily_management', 'tax_payment_plan', 'has_agreement'], key: 'dm_tpp_has_agreement', render: (val) => val ? '是' : '否', ellipsis: true, width: 100 },
-            { title: '分期情况(月)', dataIndex: ['daily_management', 'tax_payment_plan', 'month_count'], key: 'dm_tpp_month_count', ellipsis: true, width: 150 },
-            { title: '本期执行情况', dataIndex: ['daily_management', 'tax_payment_plan', 'current_execution'], key: 'dm_tpp_current_execution', ellipsis: true, width: 150 },
-            { title: '未按期履行原因', dataIndex: ['daily_management', 'tax_payment_plan', 'unfulfilled_reason'], key: 'dm_tpp_unfulfilled_reason', ellipsis: true, width: 200 },
-          ],
-        },
-        {
-          title: '欠税人报告事项',
-          key: 'dm_taxpayerReportGroup',
-          children: [
-            { title: '定期报告', dataIndex: ['daily_management', 'taxpayer_report', 'periodic_report'], key: 'dm_tr_periodic_report', ellipsis: true, width: 150 },
-            { title: '处置资产报告', dataIndex: ['daily_management', 'taxpayer_report', 'asset_disposal_report'], key: 'dm_tr_asset_disposal_report', ellipsis: true, width: 150 },
-            { title: '合并分立报告', dataIndex: ['daily_management', 'taxpayer_report', 'merger_division_report'], key: 'dm_tr_merger_division_report', ellipsis: true, width: 150 },
-          ],
-        },
-        {
-          title: '纳税人资产情况',
-          key: 'dm_taxpayerAssetsGroup',
-          children: [
-            { title: '存款账户情况', dataIndex: ['daily_management', 'taxpayer_assets', 'bank_accounts'], key: 'dm_ta_bank_accounts', ellipsis: true, width: 150 },
-            { title: '不动产信息', dataIndex: ['daily_management', 'taxpayer_assets', 'real_estate'], key: 'dm_ta_real_estate', ellipsis: true, width: 150 },
-            { title: '机动车信息', dataIndex: ['daily_management', 'taxpayer_assets', 'vehicles'], key: 'dm_ta_vehicles', ellipsis: true, width: 150 },
-            { title: '其他资产信息', dataIndex: ['daily_management', 'taxpayer_assets', 'other_assets'], key: 'dm_ta_other_assets', ellipsis: true, width: 150 },
-          ],
-        },
-      ],
-    },
-    {
-      title: '抵缴欠税情况',
-      key: 'taxPaymentWithAssetsGroup',
-      children: [
-        { title: '抵缴欠税描述', dataIndex: ['tax_payment_with_assets', 'description'], key: 'tpwa_description', ellipsis: true, width: 200 },
-      ],
-    },
-    {
-      title: '欠税追征',
-      key: 'collectionGroup',
-      children: [
-        { title: '纳税担保', dataIndex: ['collection', 'guarantees'], key: 'c_guarantees', ellipsis: true, width: 120 },
-        { title: '冻结', dataIndex: ['collection', 'freezing'], key: 'c_freezing', ellipsis: true, width: 120 },
-        { title: '查封、扣押', dataIndex: ['collection', 'seizures'], key: 'c_seizures', ellipsis: true, width: 120 },
-        { title: '催告', dataIndex: ['collection', 'reminders'], key: 'c_reminders', ellipsis: true, width: 120 },
-        { title: '强制扣缴', dataIndex: ['collection', 'forced_collection'], key: 'c_forced_collection', ellipsis: true, width: 120 },
-        { title: '拍卖、变卖', dataIndex: ['collection', 'auction'], key: 'c_auction', ellipsis: true, width: 120 },
-        { title: '申请人民法院强制执行', dataIndex: ['collection', 'court_execution'], key: 'c_court_execution', ellipsis: true, width: 200 },
-        { title: '行使代位权、撤销权', dataIndex: ['collection', 'rights_exercise'], key: 'c_rights_exercise', ellipsis: true, width: 200 },
-        { title: '阻止出境', dataIndex: ['collection', 'exit_prevention'], key: 'c_exit_prevention', ellipsis: true, width: 120 },
-        { title: '限制出境信息', dataIndex: ['collection', 'prohibited_departure'], key: 'c_prohibited_departure', ellipsis: true, width: 200 },
-      ],
-    },
-  ];
+  // 从外部配置文件获取列配置
+  const initialColumnsConfig = getInitialColumnsConfig();
 
+  // 修改列处理函数，支持编辑功能
   const [tableColumns, setTableColumns] = useState<ColumnsType<TaxForm>>(() => {
     const processCols = (currentCols: ColumnsType<TaxForm>): ColumnsType<TaxForm> => {
       return currentCols.map((col) => {
-        const newCol = { ...col } as ProcessableColumnType<TaxForm>;
+        const newCol = { ...col } as ProcessableColumnType<TaxForm> & EditableColumnType<TaxForm>;
+        
         if ('children' in newCol && newCol.children) {
           newCol.children = processCols(newCol.children);
         } else {
+          // 保存原始render函数
+          const originalRender = newCol.render;
+          
+          // 创建新的render函数，支持编辑
+          newCol.render = (text: any, record: TaxForm, index: number) => {
+            // 如果不在编辑模式，使用原始render
+            if (!isEditing || !editedData) {
+              return originalRender ? originalRender(text, record, index) : text;
+            }
+            
+            // 检查当前用户是否有权限编辑此字段
+            const canEdit = 
+              newCol.editableBy === 'both' || 
+              (newCol.editableBy === 'admin' && currentUser.userType === 'admin') ||
+              (newCol.editableBy === 'user' && (currentUser.userType === 'user' || currentUser.userType === 'admin'));
+              
+            if (!canEdit) {
+              return originalRender ? originalRender(text, record, index) : text;
+            }
+            
+            // 找到当前记录在editedData中的位置
+            const currentRecord = editedData.find(item => item.id === record.id);
+            if (!currentRecord) return text;
+            
+            // 获取字段路径，支持嵌套字段如 ['tax_info', 'outstanding_tax']
+            const fieldPath = Array.isArray(newCol.dataIndex) 
+              ? (newCol.dataIndex as (string | number)[])
+              : newCol.dataIndex ? [newCol.dataIndex as string] : [];
+              
+            if (fieldPath.length === 0) return text;
+            
+            // 获取当前编辑值
+            const currentValue = getNestedValue(currentRecord, fieldPath);
+            
+            // 处理值变更
+            const handleValueChange = (value: any) => {
+              setEditedData(prev => {
+                if (!prev) return null;
+                return prev.map(item => {
+                  if (item.id === record.id) {
+                    return setNestedValue(item, fieldPath, value);
+                  }
+                  return item;
+                });
+              });
+            };
+            
+            // 根据编辑组件类型渲染不同的输入控件
+            switch(newCol.editComponentType) {
+              case 'text':
+                return (
+                  <Input 
+                    value={currentValue} 
+                    onChange={e => handleValueChange(e.target.value)} 
+                  />
+                );
+              case 'number':
+                return (
+                  <InputNumber 
+                    value={currentValue} 
+                    onChange={value => handleValueChange(value)} 
+                  />
+                );
+              case 'textarea':
+                return (
+                  <Input.TextArea 
+                    value={currentValue} 
+                    onChange={e => handleValueChange(e.target.value)}
+                    autoSize={{ minRows: 2, maxRows: 5 }}
+                  />
+                );
+              case 'select':
+                return (
+                  <Select 
+                    value={currentValue} 
+                    onChange={value => handleValueChange(value)}
+                    options={newCol.options}
+                    style={{ width: '100%' }}
+                  />
+                );
+              case 'date':
+                return (
+                  <DatePicker 
+                    value={currentValue ? moment(currentValue) : null}
+                    onChange={(date, dateString) => handleValueChange(dateString)} 
+                  />
+                );
+              default:
+                return originalRender ? originalRender(text, record, index) : text;
+            }
+          };
+
+          // 保留原有的列宽调整逻辑
           if (typeof newCol.width === 'number' && newCol.key) {
             newCol.onHeaderCell = (currentColumn: ColumnType<TaxForm>) => ({
               width: currentColumn.width,
@@ -185,7 +266,7 @@ const Main: React.FC = () => {
                   return updateWidthRecursively(prevColumns, currentColumn.key, size.width);
                 });
               },
-            } as any); // Using 'as any' due to custom prop 'onColumnResize' not in React.HTMLAttributes<HTMLElement>
+            } as any);
           }
         }
         return newCol;
@@ -218,9 +299,25 @@ const Main: React.FC = () => {
 
   return (
     <div className="page-container">
+      <div className="table-actions">
+        {isEditing ? (
+          <>
+            <Button type="primary" onClick={handleSaveChanges} disabled={loading}>
+              保存
+            </Button>
+            <Button onClick={handleCancelEditing} disabled={loading}>
+              取消
+            </Button>
+          </>
+        ) : (
+          <Button type="primary" onClick={handleStartEditing} disabled={loading}>
+            编辑
+          </Button>
+        )}
+      </div>
       <Table
         columns={tableColumns}
-        dataSource={data}
+        dataSource={isEditing ? (editedData || []) : data}
         loading={loading}
         rowKey="id"
         bordered
