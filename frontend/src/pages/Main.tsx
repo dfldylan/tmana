@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Table, Layout, Menu, Dropdown, Avatar, Typography, Space, Divider } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import { taxForms as taxFormsApi } from '../services/api';
 import { TaxForm } from '../types/taxTypes';
@@ -7,10 +7,14 @@ import './Main.css';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { Input, InputNumber, DatePicker, Select, Button, message } from 'antd';
+import { LogoutOutlined, UserOutlined, EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useAuth } from '../App';
 import { getInitialColumnsConfig } from '../config/columnsConfig';
 import { ProcessableColumnType, EditableColumnType, ResizableTitleProps } from '../types/tableTypes';
+
+const { Header, Content, Footer } = Layout;
+const { Title, Text } = Typography;
 
 // 辅助函数：获取嵌套对象的值
 function getNestedValue(obj: any, path: (string | number)[]): any {
@@ -98,8 +102,19 @@ const Main: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedData, setEditedData] = useState<TaxForm[] | null>(null);
   
-  // 获取当前用户信息
-  const currentUser = { userType: 'admin' }; // 假设当前用户是管理员
+  // 使用 useAuth 获取认证信息和登出函数
+  const { username, userType, logout } = useAuth();
+  
+  // 处理退出登录
+  const handleLogout = async () => {
+    try {
+      await logout();
+      message.success('已成功退出登录');
+    } catch (error) {
+      console.error('退出登录时出错:', error);
+      message.error('退出登录失败，请重试');
+    }
+  };
   
   // 编辑相关的处理函数
   const handleStartEditing = () => {
@@ -142,6 +157,13 @@ const Main: React.FC = () => {
       return currentCols.map((col) => {
         const newCol = { ...col } as ProcessableColumnType<TaxForm> & EditableColumnType<TaxForm>;
         
+        // 为基础列添加编辑属性（不包含有children的组合列）
+        if (!('children' in newCol) && newCol.dataIndex) {
+          // 所有列都设为可编辑，使用文本输入框
+          newCol.editableBy = 'both';
+          newCol.editComponentType = 'text';
+        }
+        
         if ('children' in newCol && newCol.children) {
           newCol.children = processCols(newCol.children);
         } else {
@@ -150,17 +172,24 @@ const Main: React.FC = () => {
           
           // 创建新的render函数，支持编辑
           newCol.render = (text: any, record: TaxForm, index: number) => {
+            // 调试信息
+            if (index === 0 && !text && newCol.dataIndex) {
+              console.log(`渲染字段 ${String(newCol.dataIndex)}, 编辑状态: ${isEditing}, 可编辑: ${newCol.editableBy}`);
+            }
+            
             // 如果不在编辑模式，使用原始render
             if (!isEditing || !editedData) {
               return originalRender ? originalRender(text, record, index) : text;
             }
             
-            // 检查当前用户是否有权限编辑此字段
-            const canEdit = 
-              newCol.editableBy === 'both' || 
-              (newCol.editableBy === 'admin' && currentUser.userType === 'admin') ||
-              (newCol.editableBy === 'user' && (currentUser.userType === 'user' || currentUser.userType === 'admin'));
-              
+            // 如果没有dataIndex，不能编辑
+            if (!newCol.dataIndex) {
+              return originalRender ? originalRender(text, record, index) : text;
+            }
+            
+            // 简化检查：所有字段都可编辑(测试阶段)
+            const canEdit = true;
+                
             if (!canEdit) {
               return originalRender ? originalRender(text, record, index) : text;
             }
@@ -192,49 +221,14 @@ const Main: React.FC = () => {
               });
             };
             
-            // 根据编辑组件类型渲染不同的输入控件
-            switch(newCol.editComponentType) {
-              case 'text':
-                return (
-                  <Input 
-                    value={currentValue} 
-                    onChange={e => handleValueChange(e.target.value)} 
-                  />
-                );
-              case 'number':
-                return (
-                  <InputNumber 
-                    value={currentValue} 
-                    onChange={value => handleValueChange(value)} 
-                  />
-                );
-              case 'textarea':
-                return (
-                  <Input.TextArea 
-                    value={currentValue} 
-                    onChange={e => handleValueChange(e.target.value)}
-                    autoSize={{ minRows: 2, maxRows: 5 }}
-                  />
-                );
-              case 'select':
-                return (
-                  <Select 
-                    value={currentValue} 
-                    onChange={value => handleValueChange(value)}
-                    options={newCol.options}
-                    style={{ width: '100%' }}
-                  />
-                );
-              case 'date':
-                return (
-                  <DatePicker 
-                    value={currentValue ? moment(currentValue) : null}
-                    onChange={(date, dateString) => handleValueChange(dateString)} 
-                  />
-                );
-              default:
-                return originalRender ? originalRender(text, record, index) : text;
-            }
+            // 简化: 只使用文本输入框
+            return (
+              <Input 
+                value={currentValue} 
+                onChange={e => handleValueChange(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            );
           };
 
           // 保留原有的列宽调整逻辑
@@ -298,47 +292,95 @@ const Main: React.FC = () => {
   }
 
   return (
-    <div className="page-container">
-      <div className="table-actions">
-        {isEditing ? (
-          <>
-            <Button type="primary" onClick={handleSaveChanges} disabled={loading}>
-              保存
-            </Button>
-            <Button onClick={handleCancelEditing} disabled={loading}>
-              取消
-            </Button>
-          </>
-        ) : (
-          <Button type="primary" onClick={handleStartEditing} disabled={loading}>
-            编辑
-          </Button>
-        )}
-      </div>
-      <Table
-        columns={tableColumns}
-        dataSource={isEditing ? (editedData || []) : data}
-        loading={loading}
-        rowKey="id"
-        bordered
-        scroll={{ x: 'max-content' }}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50', '100'],
-          showQuickJumper: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条`,
-        }}
-        size="middle"
-        title={() => <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>税务管理总览</h1>}
-        // sticky
-        components={{
-          header: {
-            cell: ResizableTitle,
-          },
-        }}
-      />
-    </div>
+    <Layout className="main-layout">
+      <Header className="main-header">
+        <div className="header-content">
+          <div className="logo-title">
+            <Title level={3} style={{ color: 'white', margin: 0 }}>税务管理系统</Title>
+          </div>
+          <div className="user-actions">
+            <Space>
+              <Avatar icon={<UserOutlined />} />
+              <Text style={{ color: 'white' }}>{username || '未登录用户'}</Text>
+              <Text type="secondary" style={{ color: '#ccc' }}>({userType === 'admin' ? '管理员' : '普通用户'})</Text>
+              <Divider type="vertical" style={{ backgroundColor: '#555', height: '20px' }} />
+              <Button 
+                type="text" 
+                icon={<LogoutOutlined />} 
+                onClick={handleLogout}
+                style={{ color: 'white' }}
+              >
+                退出
+              </Button>
+            </Space>
+          </div>
+        </div>
+      </Header>
+
+      <Content className="main-content">
+        <div className="page-container">
+          <div className="page-header">
+            <Title level={2}>税务管理总览</Title>
+            <div className="table-actions">
+              {isEditing ? (
+                <Space>
+                  <Button 
+                    type="primary" 
+                    onClick={handleSaveChanges} 
+                    disabled={loading}
+                    icon={<SaveOutlined />}
+                  >
+                    保存
+                  </Button>
+                  <Button 
+                    onClick={handleCancelEditing} 
+                    disabled={loading}
+                    icon={<CloseOutlined />}
+                  >
+                    取消
+                  </Button>
+                </Space>
+              ) : (
+                <Button 
+                  type="primary" 
+                  onClick={handleStartEditing} 
+                  disabled={loading}
+                  icon={<EditOutlined />}
+                >
+                  编辑
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <Table
+            columns={tableColumns}
+            dataSource={isEditing ? (editedData || []) : data}
+            loading={loading}
+            rowKey="id"
+            bordered
+            scroll={{ x: 'max-content' }}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50', '100'],
+              showQuickJumper: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条`,
+            }}
+            size="middle"
+            components={{
+              header: {
+                cell: ResizableTitle,
+              },
+            }}
+          />
+        </div>
+      </Content>
+
+      <Footer style={{ textAlign: 'center' }}>
+        税务管理系统 ©{new Date().getFullYear()} 版权所有
+      </Footer>
+    </Layout>
   );
 };
 
