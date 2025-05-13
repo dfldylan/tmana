@@ -10,7 +10,7 @@ class User(AbstractUser):
     user_type = models.CharField(
         max_length=10, 
         choices=USER_TYPE_CHOICES,
-        default='user'
+        default='admin'
     )
     is_active = models.BooleanField(default=True)
 

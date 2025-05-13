@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../App';
+import { Link } from 'react-router-dom'; // 导入 Link
 
 const Login: React.FC = () => {
   // 使用优化后的 useAuth 钩子
@@ -130,6 +131,14 @@ const Login: React.FC = () => {
             {isSubmitting ? '登录中...' : '登录'}
           </button>
         </form>
+        {/* 
+          注意: 通常注册链接位于登录页面或公共导航区域。
+          此处根据您的要求添加到用户仪表盘。
+        */}
+        <p style={{ marginBottom: '20px' }}>
+            <Link to="/register">注册新用户</Link>
+        </p>
+        
       </div>
     </div>
   );

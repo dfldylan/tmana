@@ -5,6 +5,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import UserManagement from './components/UserManagement';
 import Login from './components/Login';
+import RegistrationForm from './components/RegistrationForm'; // 导入注册表单组件
 import './App.css';
 import Main from './pages/Main';
 
@@ -179,6 +180,7 @@ const App: React.FC = () => {
         <Routes>
           {/* 登录路由不需要认证检查 */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegistrationForm />} /> {/* 添加注册路由 */}
           
           {/* 受保护的路由 */}
           <Route element={<AuthLayout />}>

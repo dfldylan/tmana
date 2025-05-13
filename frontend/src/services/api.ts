@@ -148,6 +148,32 @@ export const userAPI = {
 
   // 检查用户认证状态
   checkAuth: () => api.get('/accounts/check-auth/'),
+
+  register: async (userData: { username: string, email: string, password: any, password2: any }) => {
+    try {
+      const response = await api.post('/accounts/register/', userData);
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        let errorMessage = '注册失败。';
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (Array.isArray(errorData)) {
+          errorMessage = errorData.join(' ');
+        } else if (typeof errorData === 'object' && errorData !== null) {
+          errorMessage = Object.entries(errorData)
+            .map(([field, messages]) => {
+              const msgStr = Array.isArray(messages) ? messages.join(', ') : String(messages);
+              return `${field}: ${msgStr}`;
+            })
+            .join('; ');
+        }
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || '注册过程中发生未知错误。');
+    }
+  },
 };
 
 export default api;
