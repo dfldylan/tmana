@@ -63,21 +63,13 @@ export const taxForms = {
   // 获取单个表单详情
   getForm: (id: number) => api.get<TaxForm>(`/tax-forms/${id}/`), // Ensure TaxForm is suitable here too
   
-  // 创建新表单
-  createForm: (formData: {
-    title: string;
-    description: string;
-    due_date: string;
-    status: 'pending' | 'submitted' | 'approved' | 'rejected';
-  }) => api.post('/tax-forms/', formData),
+  // 创建新税务表单
+  createForm: (formData: Omit<TaxForm, 'id'>) => 
+    api.post('/tax-forms/', formData),
   
-  // 更新表单
-  updateForm: (id: number, formData: {
-    title?: string;
-    description?: string;
-    due_date?: string;
-    status?: 'pending' | 'submitted' | 'approved' | 'rejected';
-  }) => api.patch(`/tax-forms/${id}/`, formData),
+  // 更新税务表单（完整数据）
+  updateForm: (id: number, formData: Partial<TaxForm>) => 
+    api.patch(`/tax-forms/${id}/`, formData),
   
   // 删除表单
   deleteForm: (id: number) => api.delete(`/tax-forms/${id}/`),

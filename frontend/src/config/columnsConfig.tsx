@@ -1,6 +1,6 @@
 import { ColumnsType } from 'antd/es/table';
 import { TaxForm } from '../types/taxTypes';
-import { EditableColumnType } from '../types/tableTypes';  // 假设你已将类型定义移到独立文件
+import { EditableColumnType } from '../types/tableTypes';
 
 export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [    
     {
@@ -13,8 +13,9 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'id', 
           sorter: (a, b) => a.id - b.id, 
           ellipsis: true, 
-          width: 80 
-        },
+          width: 80, 
+          admin_only: true
+        } as EditableColumnType<TaxForm>,
         { 
           title: '月度', 
           dataIndex: 'month', 
@@ -22,7 +23,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           sorter: (a, b) => a.month.localeCompare(b.month), 
           ellipsis: true, 
           width: 100,
-          editableBy: 'admin',  // 根据models.py中的admin_only_fields
+          admin_only: true, // 管理员专属字段
           editComponentType: 'text' 
         } as EditableColumnType<TaxForm>,
         { 
@@ -31,44 +32,49 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'taxpayer_name', 
           ellipsis: true, 
           width: 200,
-          editableBy: 'admin',
+          admin_only: true, // 管理员专属字段
           editComponentType: 'text'
         } as EditableColumnType<TaxForm>,
         { 
           title: '统一社会信用代码', 
           dataIndex: 'credit_code', 
           key: 'credit_code', 
-          ellipsis: true, 
+          ellipsis: true,
+          admin_only: true, // 管理员专属字段
           width: 180 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '纳税人状态', 
           dataIndex: 'taxpayer_status', 
           key: 'taxpayer_status', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 100 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '所属行业', 
           dataIndex: 'industry', 
           key: 'industry', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 150 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '主管税务机关代码', 
           dataIndex: 'tax_authority_code', 
           key: 'tax_authority_code', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 150 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '主管税务所名称', 
           dataIndex: 'tax_authority_name', 
           key: 'tax_authority_name', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 150 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '表单状态', 
           dataIndex: 'status', 
@@ -88,23 +94,26 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'outstanding_tax', 
           render: val => val?.toLocaleString(), 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段 
           width: 180 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '涉及税费种', 
           dataIndex: ['tax_info', 'tax_types'], 
           key: 'tax_types', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 250 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '清欠成效', 
           dataIndex: ['tax_info', 'collection_effect'], 
           key: 'collection_effect', 
           render: val => val?.toLocaleString(), 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 120 
-        },
+        } as EditableColumnType<TaxForm>,
       ],
     },
     {
@@ -116,8 +125,9 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           dataIndex: ['daily_management', 'reminders'], 
           key: 'dm_reminders', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 120 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '发票管控', 
           dataIndex: ['daily_management', 'invoice_control'], 
@@ -349,15 +359,17 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           dataIndex: ['collection', 'exit_prevention'], 
           key: 'c_exit_prevention', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 120 
-        },
+        } as EditableColumnType<TaxForm>,
         { 
           title: '限制出境信息', 
           dataIndex: ['collection', 'prohibited_departure'], 
           key: 'c_prohibited_departure', 
           ellipsis: true, 
+          admin_only: true, // 管理员专属字段
           width: 200 
-        },
+        } as EditableColumnType<TaxForm>,
       ],
     },
   ];

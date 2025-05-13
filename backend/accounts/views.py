@@ -36,6 +36,7 @@ class LoginView(APIView):
             return JsonResponse({
                 "success": True, 
                 "username": user.username,
+                'user_type': user.user_type,  # 确保这里返回的是正确的 user_type
                 "user_id": user.id
             })
         return JsonResponse({"error": "Invalid credentials"}, status=400)
