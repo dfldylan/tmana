@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-k)%e)so-sao#l_cp6m7y0gmg4rh_x1xnb1=wa)mebw)3vkm%_7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# 允许所有主机访问
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -133,7 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True  # 开发环境下使用，生产环境要设置具体域名
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # 前端开发服务器
+    "http://127.0.0.1:3000",  # 前端开发服务器
 ]
 
 AUTH_USER_MODEL = 'accounts.User'  # 设置自定义用户模型

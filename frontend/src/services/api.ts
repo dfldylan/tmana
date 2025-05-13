@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { TaxForm } from '../types/taxTypes';
 
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'http://39.105.111.185:8000/api';
 
 // 获取CSRF令牌函数
 function getCsrfToken() {
