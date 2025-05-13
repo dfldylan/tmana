@@ -39,7 +39,7 @@
    cd tax
    ```
 
-2. 设置后端：
+2. 设置后端，确保python3.10：
 
    ```bash
    cd backend
