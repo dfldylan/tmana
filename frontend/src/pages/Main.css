@@ -1,0 +1,66 @@
+/* 
+  Ant Design Table 组件自带样式。
+  此文件可以用于页面级容器的自定义样式，
+  例如 .page-container 或错误信息提示。
+*/
+
+body {
+  background-color: #f0f2f5; /* 给页面一个浅灰色背景 */
+}
+
+.page-container {
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji'; /* 使用更现代的字体栈 */
+  background-color: #fff; /* 内容区域使用白色背景 */
+  border-radius: 8px; /* 添加圆角 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09); /* 添加细微阴影 */
+  margin: 20px; /* 页面外边距 */
+}
+
+.error-message {
+  color: #ff4d4f; /* Ant Design 红色 */
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #ffccc7; /* Ant Design 红色边框 */
+  background-color: #fff1f0; /* Ant Design 红色背景 */
+  border-radius: 4px;
+}
+
+/* Ant Design Table 自定义 */
+:global(.ant-table-thead > tr > th) {
+  background-color: #fafafa !important; /* 表头背景色 */
+  font-weight: 600 !important; /* 表头字体加粗 */
+  color: rgba(0, 0, 0, 0.85) !important; /* 表头字体颜色 */
+  white-space: nowrap !important; /* 防止表头文字换行 */
+  text-align: center !important; /* 表头文字居中 */
+}
+
+/* 针对单元格内容 */
+:global(.ant-table-tbody > tr > td) {
+  white-space: nowrap !important; /* 防止单元格内容换行 */
+  /* 
+    当列定义中使用了 ellipsis: true 时，Ant Design 会自动处理溢出隐藏和省略号。
+    如果 ellipsis 不生效，可能需要手动添加以下样式，但通常不需要：
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  */
+}
+
+:global(.ant-table-tbody > tr:hover > td) {
+  background-color: #e6f7ff !important; /* 行悬停背景色 (Ant Design 蓝色系) */
+}
+
+:global(.ant-table-bordered .ant-table-thead > tr > th),
+:global(.ant-table-bordered .ant-table-tbody > tr > td) {
+  border-color: #f0f0f0 !important; /* 边框颜色调浅一些 */
+}
+
+:global(.ant-table-title) {
+  padding: 16px 0px !important; /* 调整表格标题内边距 */
+}
+
+:global(.ant-table-pagination.ant-pagination) {
+  margin-top: 24px !important; /* 分页器与表格间距 */
+}

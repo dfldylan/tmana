@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend  # 将宿主机的 backend 目录挂载到容器的 /app/backend
+                                # 这使得代码更改可以实时反映，并且 SQLite 数据库文件会持久化在宿主机上
+    command: /entrypoint.sh # 使用 entrypoint.sh 脚本
+    environment:
+      - PYTHONUNBUFFERED=1
+    # depends_on:
+    #   - db # 如果您将来使用独立的数据库服务，可以在这里添加依赖
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend         # 挂载前端代码，用于开发时的热重载
+      - /app/frontend/node_modules    # 匿名卷，防止宿主机的 node_modules 覆盖容器内的
+    stdin_open: true  # 等同于 docker run -i
+    tty: true         # 等同于 docker run -t
+    depends_on:
+      - backend
+
+# 如果您使用独立的数据库（如 PostgreSQL），可以在这里定义数据库服务
+# volumes:
+#   postgres_data:
+
+# services:
+#   db:
+#     image: postgres:13
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=yourdbname
+#       - POSTGRES_USER=youruser
+#       - POSTGRES_PASSWORD=yourpassword
