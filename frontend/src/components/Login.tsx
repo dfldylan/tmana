@@ -136,7 +136,15 @@ const Login: React.FC = () => {
           此处根据您的要求添加到用户仪表盘。
         */}
         <p style={{ marginBottom: '20px' }}>
-            <Link to="/register">注册新用户</Link>
+          <Link to="/register">
+            <button 
+              type="button" 
+              className="login-button"
+              disabled={isSubmitting}
+            >
+              注册
+            </button>
+          </Link>
         </p>
         
       </div>

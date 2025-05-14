@@ -391,7 +391,7 @@ const Main: React.FC = () => {
       <Content className="main-content">
         <div className="page-container">
           <div className="page-header">
-            <Title level={2}>税务管理总览</Title>
+            <Title level={2} style={{ textAlign: 'center' }}>税务管理总览</Title>
             <div className="table-actions">
               {isEditing ? (
                 <Space>
@@ -431,6 +431,7 @@ const Main: React.FC = () => {
                 </Button>
               )}
             </div>
+            <p />
           </div>
 
           <Table
