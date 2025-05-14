@@ -48,6 +48,7 @@ class CheckAuthView(APIView):
             return JsonResponse({
                 "isAuthenticated": True,
                 "username": request.user.username,
+                'user_type': request.user.user_type,  # 确保这里返回的是正确的 user_type
                 "user_id": request.user.id
             })
         return JsonResponse({"isAuthenticated": False}, status=401)

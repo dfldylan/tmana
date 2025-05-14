@@ -8,10 +8,10 @@ import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { Input, InputNumber, DatePicker, Select, Button, message } from 'antd';
 import { LogoutOutlined, UserOutlined, EditOutlined, SaveOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
-import moment from 'moment';
 import { useAuth } from '../App';
 import { getInitialColumnsConfig } from '../config/columnsConfig';
 import { ProcessableColumnType, EditableColumnType, ResizableTitleProps } from '../types/tableTypes';
+import { createEmptyTaxForm } from '../utils/formUtils';
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
@@ -63,70 +63,6 @@ function deepClone<T>(obj: T): T {
   }
   
   return result as T;
-}
-
-// 添加在 Main 组件外部，与 deepClone 等辅助函数同级
-function createEmptyTaxForm(): TaxForm {
-  return {
-    id: Date.now(), // 临时ID，保存时后端会替换
-    month: new Date().toISOString().slice(0, 7).replace('-', ''), // 当前年月，如"202505"
-    taxpayer_name: '',
-    credit_code: '',
-    taxpayer_status: '正常',
-    industry: '',
-    tax_authority_code: '',
-    tax_authority_name: '',
-    status: 'draft',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    tax_info: {
-      outstanding_tax: 0,
-      tax_types: '',
-      collection_effect: 0,
-    },
-    daily_management: {
-      reminders: '',
-      invoice_control: '未控票',
-      risk_alerts: [{ document: '', delivery_date: '' }],
-      interview: {
-        has_interview: false,
-        document: '',
-        interview_date: ''
-      },
-      tax_payment_plan: {
-        has_agreement: false,
-        month_count: 0,
-        current_execution: '',
-        unfulfilled_reason: ''
-      },
-      taxpayer_report: {
-        periodic_report: '',
-        asset_disposal_report: '',
-        merger_division_report: ''
-      },
-      taxpayer_assets: {
-        bank_accounts: '',
-        real_estate: '',
-        vehicles: '',
-        other_assets: ''
-      }
-    },
-    collection: {
-      guarantees: '',
-      freezing: '',
-      seizures: '',
-      reminders: '',
-      forced_collection: '',
-      auction: '',
-      court_execution: '',
-      rights_exercise: '',
-      exit_prevention: '',
-      prohibited_departure: ''
-    },
-    tax_payment_with_assets: {
-      description: ''
-    }
-  };
 }
 
 const ResizableTitle: React.FC<ResizableTitleProps> = (props) => {
@@ -430,9 +366,9 @@ const Main: React.FC = () => {
     <Layout className="main-layout">
       <Header className="main-header">
         <div className="header-content">
-          <div className="logo-title">
+          {/* <div className="logo-title">
             <Title level={3} style={{ color: 'white', margin: 0 }}>税务管理系统</Title>
-          </div>
+          </div> */}
           <div className="user-actions">
             <Space>
               <Avatar icon={<UserOutlined />} />
