@@ -25,11 +25,11 @@ export function createEmptyTaxForm(): TaxForm {
     daily_management: {
       reminders: '示例',
       invoice_control: '未控票', // 默认值与 models.py 中一致
-      risk_alerts: [{ document: '示例', delivery_date: '示例' }],
+      risk_alerts: [{ document: '示例', delivery_date: '2024-04-25' }],
       interview: {
         has_interview: false, // 默认值与 models.py 中一致
         document: '示例',
-        interview_date: '示例'
+        interview_date: '2024-04-25'
       },
       tax_payment_plan: {
         has_agreement: false, // 默认值与 models.py 中一致

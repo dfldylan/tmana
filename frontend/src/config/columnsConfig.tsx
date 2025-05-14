@@ -11,7 +11,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           title: '序号', 
           dataIndex: 'id', 
           key: 'id', 
-          sorter: (a, b) => a.id - b.id, 
+          sorter: (a, b) => (a.id || 0) - (b.id || 0), 
           ellipsis: true, 
           width: 80, 
           admin_only: true
@@ -20,7 +20,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           title: '月度', 
           dataIndex: 'month', 
           key: 'month', 
-          sorter: (a, b) => a.month.localeCompare(b.month), 
+          sorter: (a, b) => (a.month || '').localeCompare(b.month || ''), 
           ellipsis: true, 
           width: 100,
           admin_only: true, // 管理员专属字段
@@ -33,7 +33,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           ellipsis: true, 
           width: 200,
           admin_only: true, // 管理员专属字段
-          editComponentType: 'text'
+          editComponentType: 'text',
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '统一社会信用代码', 
@@ -41,7 +42,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'credit_code', 
           ellipsis: true,
           admin_only: true, // 管理员专属字段
-          width: 180 
+          width: 180,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '纳税人状态', 
@@ -49,7 +51,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'taxpayer_status', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 100 
+          width: 100,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '所属行业', 
@@ -57,7 +60,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'industry', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 150 
+          width: 150,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '主管税务机关代码', 
@@ -65,7 +69,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'tax_authority_code', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 150 
+          width: 150,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '主管税务所名称', 
@@ -73,14 +78,16 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'tax_authority_name', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 150 
+          width: 150,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '表单状态', 
           dataIndex: 'status', 
           key: 'status', 
           ellipsis: true, 
-          width: 100 
+          width: 100,
+          render: text => text || '-'
         },
       ],
     },
@@ -92,7 +99,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           title: '截至目前欠缴税费情况', 
           dataIndex: ['tax_info', 'outstanding_tax'], 
           key: 'outstanding_tax', 
-          render: val => val?.toLocaleString(), 
+          render: val => val?.toLocaleString() || '-', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段 
           width: 180 
@@ -103,13 +110,14 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'tax_types', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 250 
+          width: 250,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '清欠成效', 
           dataIndex: ['tax_info', 'collection_effect'], 
           key: 'collection_effect', 
-          render: val => val?.toLocaleString(), 
+          render: val => val?.toLocaleString() || '-', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
           width: 120 
@@ -126,14 +134,16 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'dm_reminders', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '发票管控', 
           dataIndex: ['daily_management', 'invoice_control'], 
           key: 'dm_invoice_control', 
           ellipsis: true, 
-          width: 100 
+          width: 100,
+          render: text => text || '-'
         },
         {
           title: '风险提醒',
@@ -142,14 +152,14 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
             { 
               title: '提醒文书', 
               key: 'dm_ra_document', 
-              render: (_, record) => record.daily_management?.risk_alerts?.[0]?.document, 
+              render: (_, record) => record.daily_management?.risk_alerts?.[0]?.document || '-', 
               ellipsis: true, 
               width: 120 
             },
             { 
               title: '送达时间', 
               key: 'dm_ra_delivery_date', 
-              render: (_, record) => record.daily_management?.risk_alerts?.[0]?.delivery_date, 
+              render: (_, record) => record.daily_management?.risk_alerts?.[0]?.delivery_date || '-', 
               ellipsis: true, 
               width: 120 
             },
@@ -163,7 +173,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               title: '是否约谈', 
               dataIndex: ['daily_management', 'interview', 'has_interview'], 
               key: 'dm_i_has_interview', 
-              render: (val) => val ? '是' : '否', 
+              render: (val) => val === true ? '是' : val === false ? '否' : '-', 
               ellipsis: true, 
               width: 100 
             },
@@ -172,14 +182,16 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               dataIndex: ['daily_management', 'interview', 'document'], 
               key: 'dm_i_document', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '约谈时间', 
               dataIndex: ['daily_management', 'interview', 'interview_date'], 
               key: 'dm_i_interview_date', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
           ],
         },
@@ -191,7 +203,7 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               title: '有无订立', 
               dataIndex: ['daily_management', 'tax_payment_plan', 'has_agreement'], 
               key: 'dm_tpp_has_agreement', 
-              render: (val) => val ? '是' : '否', 
+              render: (val) => val === true ? '是' : val === false ? '否' : '-', 
               ellipsis: true, 
               width: 100 
             },
@@ -200,21 +212,24 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               dataIndex: ['daily_management', 'tax_payment_plan', 'month_count'], 
               key: 'dm_tpp_month_count', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: val => val?.toString() || '-'
             },
             { 
               title: '本期执行情况', 
               dataIndex: ['daily_management', 'tax_payment_plan', 'current_execution'], 
               key: 'dm_tpp_current_execution', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '未按期履行原因', 
               dataIndex: ['daily_management', 'tax_payment_plan', 'unfulfilled_reason'], 
               key: 'dm_tpp_unfulfilled_reason', 
               ellipsis: true, 
-              width: 200 
+              width: 200,
+              render: text => text || '-'
             },
           ],
         },
@@ -227,21 +242,24 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               dataIndex: ['daily_management', 'taxpayer_report', 'periodic_report'], 
               key: 'dm_tr_periodic_report', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '处置资产报告', 
               dataIndex: ['daily_management', 'taxpayer_report', 'asset_disposal_report'], 
               key: 'dm_tr_asset_disposal_report', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '合并分立报告', 
               dataIndex: ['daily_management', 'taxpayer_report', 'merger_division_report'], 
               key: 'dm_tr_merger_division_report', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
           ],
         },
@@ -254,28 +272,32 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
               dataIndex: ['daily_management', 'taxpayer_assets', 'bank_accounts'], 
               key: 'dm_ta_bank_accounts', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '不动产信息', 
               dataIndex: ['daily_management', 'taxpayer_assets', 'real_estate'], 
               key: 'dm_ta_real_estate', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '机动车信息', 
               dataIndex: ['daily_management', 'taxpayer_assets', 'vehicles'], 
               key: 'dm_ta_vehicles', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
             { 
               title: '其他资产信息', 
               dataIndex: ['daily_management', 'taxpayer_assets', 'other_assets'], 
               key: 'dm_ta_other_assets', 
               ellipsis: true, 
-              width: 150 
+              width: 150,
+              render: text => text || '-'
             },
           ],
         },
@@ -290,7 +312,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           dataIndex: ['tax_payment_with_assets', 'description'], 
           key: 'tpwa_description', 
           ellipsis: true, 
-          width: 200 
+          width: 200,
+          render: text => text || '-'
         },
       ],
     },
@@ -303,56 +326,64 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           dataIndex: ['collection', 'guarantees'], 
           key: 'c_guarantees', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '冻结', 
           dataIndex: ['collection', 'freezing'], 
           key: 'c_freezing', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '查封、扣押', 
           dataIndex: ['collection', 'seizures'], 
           key: 'c_seizures', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '催告', 
           dataIndex: ['collection', 'reminders'], 
           key: 'c_reminders', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '强制扣缴', 
           dataIndex: ['collection', 'forced_collection'], 
           key: 'c_forced_collection', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '拍卖、变卖', 
           dataIndex: ['collection', 'auction'], 
           key: 'c_auction', 
           ellipsis: true, 
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         },
         { 
           title: '申请人民法院强制执行', 
           dataIndex: ['collection', 'court_execution'], 
           key: 'c_court_execution', 
           ellipsis: true, 
-          width: 200 
+          width: 200,
+          render: text => text || '-'
         },
         { 
           title: '行使代位权、撤销权', 
           dataIndex: ['collection', 'rights_exercise'], 
           key: 'c_rights_exercise', 
           ellipsis: true, 
-          width: 200 
+          width: 200,
+          render: text => text || '-'
         },
         { 
           title: '阻止出境', 
@@ -360,7 +391,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'c_exit_prevention', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 120 
+          width: 120,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
         { 
           title: '限制出境信息', 
@@ -368,7 +400,8 @@ export const getInitialColumnsConfig = (): ColumnsType<TaxForm> => [
           key: 'c_prohibited_departure', 
           ellipsis: true, 
           admin_only: true, // 管理员专属字段
-          width: 200 
+          width: 200,
+          render: text => text || '-'
         } as EditableColumnType<TaxForm>,
       ],
     },
